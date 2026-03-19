@@ -1,0 +1,418 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  User, 
+  Lock, 
+  ChevronRight, 
+  Users, 
+  UserPlus, 
+  Calendar, 
+  FileText, 
+  LogOut, 
+  Menu, 
+  X,
+  LayoutDashboard,
+  Stethoscope
+} from 'lucide-react';
+
+// --- Types ---
+type View = 'dashboard' | 'profissional' | 'cliente' | 'agenda' | 'prontuario';
+
+// --- Components ---
+
+const SidebarItem = ({ 
+  icon: Icon, 
+  label, 
+  active, 
+  onClick 
+}: { 
+  icon: any, 
+  label: string, 
+  active: boolean, 
+  onClick: () => void,
+  key?: string | number
+}) => (
+  <button
+    onClick={onClick}
+    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+      active 
+        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
+        : 'text-slate-400 hover:bg-white/5 hover:text-white'
+    }`}
+  >
+    <Icon size={20} />
+    <span className="font-medium">{label}</span>
+  </button>
+);
+
+const ProfissionalForm = () => {
+  const [formData, setFormData] = useState({
+    cpf: '',
+    crp: '',
+    nome: '',
+    endereco: '',
+    telefone: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Cadastro de Profissional:', formData);
+    alert('Profissional cadastrado com sucesso! (Simulação)');
+    setFormData({ cpf: '', crp: '', nome: '', endereco: '', telefone: '' });
+  };
+
+  const inputClasses = "w-full bg-white/5 border border-white/10 text-white placeholder:text-slate-500 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all";
+  const iconClasses = "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-400 transition-colors";
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-2xl mx-auto p-8"
+    >
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2">Cadastrar Profissional</h1>
+        <p className="text-slate-400">Preencha as informações abaixo para registrar um novo profissional no sistema.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6 bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="relative group">
+            <div className={iconClasses}><FileText size={20} /></div>
+            <input
+              type="text"
+              placeholder="CPF"
+              required
+              value={formData.cpf}
+              onChange={(e) => setFormData({...formData, cpf: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="relative group">
+            <div className={iconClasses}><FileText size={20} /></div>
+            <input
+              type="text"
+              placeholder="CRP"
+              required
+              value={formData.crp}
+              onChange={(e) => setFormData({...formData, crp: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+        </div>
+
+        <div className="relative group">
+          <div className={iconClasses}><User size={20} /></div>
+          <input
+            type="text"
+            placeholder="Nome Completo"
+            required
+            value={formData.nome}
+            onChange={(e) => setFormData({...formData, nome: e.target.value})}
+            className={inputClasses}
+          />
+        </div>
+
+        <div className="relative group">
+          <div className={iconClasses}><LayoutDashboard size={20} /></div>
+          <input
+            type="text"
+            placeholder="Endereço"
+            required
+            value={formData.endereco}
+            onChange={(e) => setFormData({...formData, endereco: e.target.value})}
+            className={inputClasses}
+          />
+        </div>
+
+        <div className="relative group">
+          <div className={iconClasses}><Users size={20} /></div>
+          <input
+            type="text"
+            placeholder="Telefone"
+            required
+            value={formData.telefone}
+            onChange={(e) => setFormData({...formData, telefone: e.target.value})}
+            className={inputClasses}
+          />
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-3 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition-all"
+        >
+          <span>Salvar Cadastro</span>
+          <ChevronRight size={18} />
+        </motion.button>
+      </form>
+    </motion.div>
+  );
+};
+
+const Dashboard = ({ onLogout }: { onLogout: () => void }) => {
+  const [activeView, setActiveView] = useState<View>('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const menuItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'profissional', label: 'Cadastrar Profissional', icon: Stethoscope },
+    { id: 'cliente', label: 'Cadastrar Cliente', icon: UserPlus },
+    { id: 'agenda', label: 'Agenda', icon: Calendar },
+    { id: 'prontuario', label: 'Consultar Prontuário', icon: FileText },
+  ];
+
+  const renderContent = () => {
+    switch (activeView) {
+      case 'profissional':
+        return <ProfissionalForm />;
+      case 'cliente':
+        return <div className="p-8 text-white"><h1>Cadastrar Cliente</h1><p className="text-slate-400 mt-2">Formulário de cadastro de novos pacientes.</p></div>;
+      case 'agenda':
+        return <div className="p-8 text-white"><h1>Agenda de Compromissos</h1><p className="text-slate-400 mt-2">Visualize e gerencie seus agendamentos.</p></div>;
+      case 'prontuario':
+        return <div className="p-8 text-white"><h1>Consultar Prontuário</h1><p className="text-slate-400 mt-2">Busca e visualização de prontuários médicos.</p></div>;
+      default:
+        return (
+          <div className="p-8 text-white">
+            <h1 className="text-2xl font-bold mb-6">Bem-vindo ao MindCare Dashboard</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { label: 'Pacientes Ativos', value: '124', color: 'bg-blue-500' },
+                { label: 'Consultas Hoje', value: '12', color: 'bg-emerald-500' },
+                { label: 'Profissionais', value: '18', color: 'bg-purple-500' },
+                { label: 'Pendências', value: '3', color: 'bg-amber-500' },
+              ].map((stat, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="bg-white/5 border border-white/10 p-6 rounded-2xl"
+                >
+                  <p className="text-slate-400 text-sm mb-1">{stat.label}</p>
+                  <p className="text-3xl font-bold">{stat.value}</p>
+                  <div className={`h-1 w-12 ${stat.color} mt-4 rounded-full`} />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0f172a] flex">
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar */}
+      <motion.aside
+        className={`fixed lg:static inset-y-0 left-0 w-72 bg-white/5 border-r border-white/10 z-50 transform transition-transform duration-300 lg:translate-x-0 ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="h-full flex flex-col p-6">
+          <div className="flex items-center space-x-3 mb-10 px-2">
+            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <Stethoscope className="text-white" size={24} />
+            </div>
+            <span className="text-xl font-bold text-white tracking-tight">MindCare</span>
+          </div>
+
+          <nav className="flex-1 space-y-2">
+            {menuItems.map((item) => (
+              <SidebarItem
+                key={item.id}
+                icon={item.icon}
+                label={item.label}
+                active={activeView === item.id}
+                onClick={() => {
+                  setActiveView(item.id as View);
+                  setIsSidebarOpen(false);
+                }}
+              />
+            ))}
+          </nav>
+
+          <button
+            onClick={onLogout}
+            className="mt-auto flex items-center space-x-3 px-4 py-3 text-slate-400 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all duration-200"
+          >
+            <LogOut size={20} />
+            <span className="font-medium">Sair</span>
+          </button>
+        </div>
+      </motion.aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <header className="h-20 border-b border-white/10 flex items-center justify-between px-8 bg-white/5 backdrop-blur-md sticky top-0 z-30">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="lg:hidden text-slate-400 hover:text-white transition-colors"
+          >
+            <Menu size={24} />
+          </button>
+          
+          <div className="flex-1 lg:flex-none" />
+
+          <div className="flex items-center space-x-4">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-medium text-white">Dr. Ricardo Silva</p>
+              <p className="text-xs text-slate-400">Administrador</p>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold">
+              RS
+            </div>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-auto">
+          {renderContent()}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Simulating login
+    setIsLoggedIn(true);
+  };
+
+  if (isLoggedIn) {
+    return <Dashboard onLogout={() => setIsLoggedIn(false)} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 font-sans relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-3xl" />
+      
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl relative z-10"
+      >
+        <div className="text-center mb-8">
+          <motion.h1 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-4xl font-bold text-white tracking-tight mb-2"
+          >
+            Login
+          </motion.h1>
+          <p className="text-slate-400 text-sm">Bem-vindo ao MindCare System</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-400 transition-colors">
+              <User size={20} />
+            </div>
+            <input
+              type="text"
+              placeholder="Nome de usuário"
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 text-white placeholder:text-slate-500 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+            />
+          </div>
+
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-400 transition-colors">
+              <Lock size={20} />
+            </div>
+            <input
+              type="password"
+              placeholder="Senha"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 text-white placeholder:text-slate-500 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+            />
+          </div>
+
+          <div className="flex items-center justify-between text-sm">
+            <label className="flex items-center space-x-2 cursor-pointer group">
+              <div className="relative flex items-center justify-center">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="peer h-5 w-5 appearance-none rounded border border-white/20 bg-white/5 checked:bg-emerald-500 checked:border-emerald-500 transition-all cursor-pointer"
+                />
+                <svg
+                  className="absolute h-3.5 w-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <span className="text-slate-300 group-hover:text-white transition-colors">Lembrar</span>
+            </label>
+            <a href="#" className="text-emerald-400 hover:text-emerald-300 transition-colors font-medium">
+              Esqueci minha senha
+            </a>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            type="submit"
+            className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-3 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition-all"
+          >
+            <span>Entrar</span>
+            <ChevronRight size={18} />
+          </motion.button>
+
+          <div className="text-center pt-4">
+            <p className="text-slate-400 text-sm">
+              Não tem conta?{' '}
+              <a href="#" className="text-emerald-400 hover:text-emerald-300 transition-colors font-medium">
+                Registrar
+              </a>
+            </p>
+          </div>
+        </form>
+      </motion.div>
+    </div>
+  );
+}
