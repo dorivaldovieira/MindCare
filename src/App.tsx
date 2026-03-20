@@ -700,11 +700,16 @@ export default function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulating login
-    setIsLoggedIn(true);
+    if (username === 'admin' && password === 'Estrela@2012') {
+      setIsLoggedIn(true);
+      setError('');
+    } else {
+      setError('Usuário ou senha incorretos.');
+    }
   };
 
   if (isLoggedIn) {
@@ -734,6 +739,16 @@ export default function App() {
           </motion.h1>
           <p className="text-slate-400 text-sm">Bem-vindo ao MindCare System</p>
         </div>
+
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-xl mb-6 text-center"
+          >
+            {error}
+          </motion.div>
+        )}
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="relative group">
