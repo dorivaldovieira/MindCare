@@ -17,11 +17,13 @@ import {
   Menu, 
   X,
   LayoutDashboard,
-  Stethoscope
+  Stethoscope,
+  Search,
+  ClipboardList
 } from 'lucide-react';
 
 // --- Types ---
-type View = 'dashboard' | 'profissional' | 'cliente' | 'agenda' | 'prontuario';
+type View = 'dashboard' | 'profissional' | 'cliente' | 'consultar_cliente' | 'ficha_atendimento' | 'agenda' | 'prontuario';
 
 // --- Components ---
 
@@ -157,6 +159,398 @@ const ProfissionalForm = () => {
   );
 };
 
+const ClienteForm = () => {
+  const [formData, setFormData] = useState({
+    codigo: '',
+    cpf: '',
+    rg: '',
+    nome: '',
+    endereco: '',
+    telefone: '',
+    contato: '',
+    pai: '',
+    mae: '',
+    cid: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Cadastro de Cliente:', formData);
+    alert('Cliente cadastrado com sucesso! (Simulação)');
+    setFormData({
+      codigo: '',
+      cpf: '',
+      rg: '',
+      nome: '',
+      endereco: '',
+      telefone: '',
+      contato: '',
+      pai: '',
+      mae: '',
+      cid: ''
+    });
+  };
+
+  const inputClasses = "w-full bg-white/5 border border-white/10 text-white placeholder:text-slate-500 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all";
+  const iconClasses = "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-400 transition-colors";
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-4xl mx-auto p-8"
+    >
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2">Cadastrar Cliente</h1>
+        <p className="text-slate-400">Preencha as informações abaixo para registrar um novo paciente no sistema.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6 bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="relative group">
+            <div className={iconClasses}><FileText size={20} /></div>
+            <input
+              type="text"
+              placeholder="Código Cliente"
+              required
+              value={formData.codigo}
+              onChange={(e) => setFormData({...formData, codigo: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="relative group">
+            <div className={iconClasses}><FileText size={20} /></div>
+            <input
+              type="text"
+              placeholder="CPF"
+              required
+              value={formData.cpf}
+              onChange={(e) => setFormData({...formData, cpf: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="relative group">
+            <div className={iconClasses}><FileText size={20} /></div>
+            <input
+              type="text"
+              placeholder="RG"
+              required
+              value={formData.rg}
+              onChange={(e) => setFormData({...formData, rg: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+        </div>
+
+        <div className="relative group">
+          <div className={iconClasses}><User size={20} /></div>
+          <input
+            type="text"
+            placeholder="Nome Completo"
+            required
+            value={formData.nome}
+            onChange={(e) => setFormData({...formData, nome: e.target.value})}
+            className={inputClasses}
+          />
+        </div>
+
+        <div className="relative group">
+          <div className={iconClasses}><LayoutDashboard size={20} /></div>
+          <input
+            type="text"
+            placeholder="Endereço"
+            required
+            value={formData.endereco}
+            onChange={(e) => setFormData({...formData, endereco: e.target.value})}
+            className={inputClasses}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="relative group">
+            <div className={iconClasses}><Users size={20} /></div>
+            <input
+              type="text"
+              placeholder="Telefone"
+              required
+              value={formData.telefone}
+              onChange={(e) => setFormData({...formData, telefone: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="relative group">
+            <div className={iconClasses}><Users size={20} /></div>
+            <input
+              type="text"
+              placeholder="Contato de Emergência"
+              value={formData.contato}
+              onChange={(e) => setFormData({...formData, contato: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="relative group">
+            <div className={iconClasses}><User size={20} /></div>
+            <input
+              type="text"
+              placeholder="Nome do Pai"
+              value={formData.pai}
+              onChange={(e) => setFormData({...formData, pai: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="relative group">
+            <div className={iconClasses}><User size={20} /></div>
+            <input
+              type="text"
+              placeholder="Nome da Mãe"
+              value={formData.mae}
+              onChange={(e) => setFormData({...formData, mae: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+        </div>
+
+        <div className="relative group">
+          <div className={iconClasses}><Stethoscope size={20} /></div>
+          <input
+            type="text"
+            placeholder="CID (Classificação Internacional de Doenças)"
+            value={formData.cid}
+            onChange={(e) => setFormData({...formData, cid: e.target.value})}
+            className={inputClasses}
+          />
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-3 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition-all"
+        >
+          <span>Salvar Cadastro</span>
+          <ChevronRight size={18} />
+        </motion.button>
+      </form>
+    </motion.div>
+  );
+};
+
+const ConsultarCliente = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Mock data for clients
+  const clients = [
+    { id: 1, codigo: 'CLI001', nome: 'Ana Oliveira', cpf: '123.456.789-00', prontuario: 'PRONT-2024-001' },
+    { id: 2, codigo: 'CLI002', nome: 'Bruno Santos', cpf: '234.567.890-11', prontuario: 'PRONT-2024-002' },
+    { id: 3, codigo: 'CLI003', nome: 'Carla Lima', cpf: '345.678.901-22', prontuario: 'PRONT-2024-003' },
+    { id: 4, codigo: 'CLI004', nome: 'Daniel Costa', cpf: '456.789.012-33', prontuario: 'PRONT-2024-004' },
+    { id: 5, codigo: 'CLI005', nome: 'Eduarda Rocha', cpf: '567.890.123-44', prontuario: 'PRONT-2024-005' },
+  ];
+
+  const filteredClients = clients.filter(client => 
+    client.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.cpf.includes(searchTerm)
+  );
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="p-8"
+    >
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2">Consultar Cliente</h1>
+        <p className="text-slate-400">Busque e visualize informações básicas dos clientes cadastrados.</p>
+      </div>
+
+      <div className="mb-6 relative group max-w-md">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-400 transition-colors">
+          <Search size={20} />
+        </div>
+        <input
+          type="text"
+          placeholder="Buscar por nome, código ou CPF..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full bg-white/5 border border-white/10 text-white placeholder:text-slate-500 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+        />
+      </div>
+
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/10 bg-white/5">
+                <th className="px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Código</th>
+                <th className="px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Nome</th>
+                <th className="px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">CPF</th>
+                <th className="px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Prontuário</th>
+                <th className="px-6 py-4 text-slate-300 font-semibold text-sm uppercase tracking-wider text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {filteredClients.length > 0 ? (
+                filteredClients.map((client) => (
+                  <motion.tr 
+                    key={client.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="hover:bg-white/5 transition-colors group"
+                  >
+                    <td className="px-6 py-4 text-emerald-400 font-mono text-sm">{client.codigo}</td>
+                    <td className="px-6 py-4 text-white font-medium">{client.nome}</td>
+                    <td className="px-6 py-4 text-slate-300">{client.cpf}</td>
+                    <td className="px-6 py-4 text-slate-300">
+                      <span className="bg-blue-500/10 text-blue-400 px-2 py-1 rounded text-xs font-medium border border-blue-500/20">
+                        {client.prontuario}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button className="text-slate-400 hover:text-emerald-400 transition-colors p-2 rounded-lg hover:bg-emerald-500/10">
+                        <FileText size={18} />
+                      </button>
+                    </td>
+                  </motion.tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                    Nenhum cliente encontrado com os termos de busca.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const FichaAtendimentoForm = () => {
+  const [formData, setFormData] = useState({
+    codigo: '',
+    nome: '',
+    cpf: '',
+    cid: '',
+    prontuario: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Ficha de Atendimento Vinculada:', formData);
+    alert('Prontuário vinculado à ficha do cliente com sucesso!');
+    setFormData({ codigo: '', nome: '', cpf: '', cid: '', prontuario: '' });
+  };
+
+  const inputClasses = "w-full bg-white/5 border border-white/10 text-white placeholder:text-slate-500 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all";
+  const iconClasses = "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-400 transition-colors";
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-4xl mx-auto p-8"
+    >
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2">Ficha de Atendimento</h1>
+        <p className="text-slate-400">Preencha os dados do atendimento e vincule o prontuário ao cliente.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6 bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="relative group">
+            <div className={iconClasses}><FileText size={20} /></div>
+            <input
+              type="text"
+              placeholder="Código Cliente"
+              required
+              value={formData.codigo}
+              onChange={(e) => setFormData({...formData, codigo: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="relative group md:col-span-2">
+            <div className={iconClasses}><User size={20} /></div>
+            <input
+              type="text"
+              placeholder="Nome Completo"
+              required
+              value={formData.nome}
+              onChange={(e) => setFormData({...formData, nome: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="relative group">
+            <div className={iconClasses}><FileText size={20} /></div>
+            <input
+              type="text"
+              placeholder="CPF"
+              required
+              value={formData.cpf}
+              onChange={(e) => setFormData({...formData, cpf: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="relative group">
+            <div className={iconClasses}><Stethoscope size={20} /></div>
+            <input
+              type="text"
+              placeholder="CID"
+              value={formData.cid}
+              onChange={(e) => setFormData({...formData, cid: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+        </div>
+
+        <div className="relative group">
+          <div className="absolute top-3 left-4 pointer-events-none text-slate-400 group-focus-within:text-emerald-400 transition-colors">
+            <FileText size={20} />
+          </div>
+          <textarea
+            placeholder="Prontuário (Até 2000 caracteres)"
+            required
+            maxLength={2000}
+            rows={8}
+            value={formData.prontuario}
+            onChange={(e) => setFormData({...formData, prontuario: e.target.value})}
+            className="w-full bg-white/5 border border-white/10 text-white placeholder:text-slate-500 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all resize-none"
+          />
+          <div className="text-right mt-1">
+            <span className={`text-xs ${formData.prontuario.length > 1900 ? 'text-amber-400' : 'text-slate-500'}`}>
+              {formData.prontuario.length} / 2000
+            </span>
+          </div>
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-3 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition-all"
+        >
+          <span>Vincular Prontuário</span>
+          <ChevronRight size={18} />
+        </motion.button>
+      </form>
+    </motion.div>
+  );
+};
+
 const Dashboard = ({ onLogout }: { onLogout: () => void }) => {
   const [activeView, setActiveView] = useState<View>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -165,6 +559,8 @@ const Dashboard = ({ onLogout }: { onLogout: () => void }) => {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'profissional', label: 'Cadastrar Profissional', icon: Stethoscope },
     { id: 'cliente', label: 'Cadastrar Cliente', icon: UserPlus },
+    { id: 'consultar_cliente', label: 'Consultar Cliente', icon: Search },
+    { id: 'ficha_atendimento', label: 'Ficha de Atendimento', icon: ClipboardList },
     { id: 'agenda', label: 'Agenda', icon: Calendar },
     { id: 'prontuario', label: 'Consultar Prontuário', icon: FileText },
   ];
@@ -174,7 +570,11 @@ const Dashboard = ({ onLogout }: { onLogout: () => void }) => {
       case 'profissional':
         return <ProfissionalForm />;
       case 'cliente':
-        return <div className="p-8 text-white"><h1>Cadastrar Cliente</h1><p className="text-slate-400 mt-2">Formulário de cadastro de novos pacientes.</p></div>;
+        return <ClienteForm />;
+      case 'consultar_cliente':
+        return <ConsultarCliente />;
+      case 'ficha_atendimento':
+        return <FichaAtendimentoForm />;
       case 'agenda':
         return <div className="p-8 text-white"><h1>Agenda de Compromissos</h1><p className="text-slate-400 mt-2">Visualize e gerencie seus agendamentos.</p></div>;
       case 'prontuario':
