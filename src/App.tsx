@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   User, 
@@ -19,11 +19,13 @@ import {
   LayoutDashboard,
   Stethoscope,
   Search,
-  ClipboardList
+  ClipboardList,
+  Mail,
+  RefreshCw
 } from 'lucide-react';
 
 // --- Types ---
-type View = 'dashboard' | 'profissional' | 'cliente' | 'consultar_cliente' | 'ficha_atendimento' | 'agenda' | 'prontuario';
+type View = 'dashboard' | 'profissional' | 'cliente' | 'consultar_cliente' | 'ficha_atendimento' | 'agenda';
 
 // --- Components ---
 
@@ -441,17 +443,24 @@ const FichaAtendimentoForm = () => {
     nome: '',
     cpf: '',
     cid: '',
+    profissional: '',
     prontuario: ''
   });
+
+  const profissionaisMock = [
+    { id: 1, nome: 'Dr. João Silva - Psicólogo' },
+    { id: 2, nome: 'Dra. Maria Oliveira - Psiquiatra' },
+    { id: 3, nome: 'Dr. Carlos Santos - Terapeuta' },
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Ficha de Atendimento Vinculada:', formData);
     alert('Prontuário vinculado à ficha do cliente com sucesso!');
-    setFormData({ codigo: '', nome: '', cpf: '', cid: '', prontuario: '' });
+    setFormData({ codigo: '', nome: '', cpf: '', cid: '', profissional: '', prontuario: '' });
   };
 
-  const inputClasses = "w-full bg-white/5 border border-white/10 text-white placeholder:text-slate-500 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all";
+  const inputClasses = "w-full bg-white/5 border border-white/10 text-white placeholder:text-slate-500 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all appearance-none";
   const iconClasses = "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-400 transition-colors";
 
   return (
@@ -518,6 +527,26 @@ const FichaAtendimentoForm = () => {
         </div>
 
         <div className="relative group">
+          <div className={iconClasses}><Users size={20} /></div>
+          <select
+            required
+            value={formData.profissional}
+            onChange={(e) => setFormData({...formData, profissional: e.target.value})}
+            className={inputClasses}
+          >
+            <option value="" disabled className="bg-slate-900">Selecione o Profissional</option>
+            {profissionaisMock.map((prof) => (
+              <option key={prof.id} value={prof.nome} className="bg-slate-900">
+                {prof.nome}
+              </option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+            <ChevronRight size={18} className="rotate-90" />
+          </div>
+        </div>
+
+        <div className="relative group">
           <div className="absolute top-3 left-4 pointer-events-none text-slate-400 group-focus-within:text-emerald-400 transition-colors">
             <FileText size={20} />
           </div>
@@ -551,6 +580,211 @@ const FichaAtendimentoForm = () => {
   );
 };
 
+const AgendaForm = () => {
+  const [formData, setFormData] = useState({
+    paciente: '',
+    data: '',
+    hora: '',
+    descricao: '',
+    gmail: ''
+  });
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [googleTokens, setGoogleTokens] = useState<any>(null);
+
+  const pacientesMock = [
+    { id: 1, nome: 'Ana Oliveira' },
+    { id: 2, nome: 'Bruno Santos' },
+    { id: 3, nome: 'Carla Lima' },
+    { id: 4, nome: 'Daniel Costa' },
+    { id: 5, nome: 'Eduarda Rocha' },
+  ];
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'OAUTH_AUTH_SUCCESS') {
+        setGoogleTokens(event.data.tokens);
+        alert('Conta Google conectada com sucesso!');
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  const handleConnectGoogle = async () => {
+    try {
+      const response = await fetch('/api/auth/google/url');
+      const { url } = await response.json();
+      window.open(url, 'google_oauth', 'width=600,height=700');
+    } catch (error) {
+      console.error('Erro ao obter URL de autenticação:', error);
+      alert('Erro ao conectar com o Google. Verifique as configurações do servidor.');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (googleTokens) {
+      setIsSyncing(true);
+      try {
+        const startDateTime = `${formData.data}T${formData.hora}:00`;
+        const endDateTime = new Date(new Date(startDateTime).getTime() + 60 * 60 * 1000).toISOString();
+
+        const response = await fetch('/api/calendar/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tokens: googleTokens,
+            event: {
+              summary: `Consulta: ${formData.paciente}`,
+              description: formData.descricao,
+              start: startDateTime,
+              end: endDateTime
+            }
+          })
+        });
+
+        if (response.ok) {
+          alert('Agendamento salvo e sincronizado com o Google Calendar!');
+        } else {
+          alert('Agendamento salvo localmente, mas houve um erro na sincronização.');
+        }
+      } catch (error) {
+        console.error('Erro na sincronização:', error);
+        alert('Erro ao sincronizar com o Google.');
+      } finally {
+        setIsSyncing(false);
+      }
+    } else {
+      alert('Agendamento salvo localmente! (Conecte ao Google para sincronizar)');
+    }
+
+    setFormData({ paciente: '', data: '', hora: '', descricao: '', gmail: '' });
+  };
+
+  const inputClasses = "w-full bg-white/5 border border-white/10 text-white placeholder:text-slate-500 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all";
+  const iconClasses = "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-400 transition-colors";
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-4xl mx-auto p-8"
+    >
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Agenda de Compromissos</h1>
+          <p className="text-slate-400">Agende consultas e sincronize com o Google Calendar.</p>
+        </div>
+        {!googleTokens ? (
+          <button
+            onClick={handleConnectGoogle}
+            className="bg-white text-slate-900 px-4 py-2 rounded-xl font-semibold flex items-center space-x-2 hover:bg-slate-200 transition-colors"
+          >
+            <Mail size={18} />
+            <span>Conectar Gmail</span>
+          </button>
+        ) : (
+          <div className="flex items-center space-x-2 text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
+            <RefreshCw size={18} className="animate-spin-slow" />
+            <span className="text-sm font-medium">Gmail Conectado</span>
+          </div>
+        )}
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6 bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl">
+        <div className="relative group">
+          <div className={iconClasses}><User size={20} /></div>
+          <select
+            required
+            value={formData.paciente}
+            onChange={(e) => setFormData({...formData, paciente: e.target.value})}
+            className={`${inputClasses} appearance-none`}
+          >
+            <option value="" disabled className="bg-slate-900">Selecione o Paciente</option>
+            {pacientesMock.map((paciente) => (
+              <option key={paciente.id} value={paciente.nome} className="bg-slate-900">
+                {paciente.nome}
+              </option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+            <ChevronRight size={18} className="rotate-90" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="relative group">
+            <div className={iconClasses}><Calendar size={20} /></div>
+            <input
+              type="date"
+              required
+              value={formData.data}
+              onChange={(e) => setFormData({...formData, data: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="relative group">
+            <div className={iconClasses}><Calendar size={20} /></div>
+            <input
+              type="time"
+              required
+              value={formData.hora}
+              onChange={(e) => setFormData({...formData, hora: e.target.value})}
+              className={inputClasses}
+            />
+          </div>
+        </div>
+
+        <div className="relative group">
+          <div className={iconClasses}><Mail size={20} /></div>
+          <input
+            type="email"
+            placeholder="E-mail do Gmail para Sincronização"
+            value={formData.gmail}
+            onChange={(e) => setFormData({...formData, gmail: e.target.value})}
+            className={inputClasses}
+          />
+        </div>
+
+        <div className="relative group">
+          <div className="absolute top-3 left-4 pointer-events-none text-slate-400 group-focus-within:text-emerald-400 transition-colors">
+            <FileText size={20} />
+          </div>
+          <textarea
+            placeholder="Descrição da Consulta"
+            rows={4}
+            value={formData.descricao}
+            onChange={(e) => setFormData({...formData, descricao: e.target.value})}
+            className="w-full bg-white/5 border border-white/10 text-white placeholder:text-slate-500 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all resize-none"
+          />
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          disabled={isSyncing}
+          className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-3 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSyncing ? (
+            <>
+              <RefreshCw size={18} className="animate-spin" />
+              <span>Sincronizando...</span>
+            </>
+          ) : (
+            <>
+              <span>Salvar Agendamento</span>
+              <ChevronRight size={18} />
+            </>
+          )}
+        </motion.button>
+      </form>
+    </motion.div>
+  );
+};
+
 const Dashboard = ({ onLogout }: { onLogout: () => void }) => {
   const [activeView, setActiveView] = useState<View>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -562,7 +796,6 @@ const Dashboard = ({ onLogout }: { onLogout: () => void }) => {
     { id: 'consultar_cliente', label: 'Consultar Cliente', icon: Search },
     { id: 'ficha_atendimento', label: 'Ficha de Atendimento', icon: ClipboardList },
     { id: 'agenda', label: 'Agenda', icon: Calendar },
-    { id: 'prontuario', label: 'Consultar Prontuário', icon: FileText },
   ];
 
   const renderContent = () => {
@@ -576,9 +809,7 @@ const Dashboard = ({ onLogout }: { onLogout: () => void }) => {
       case 'ficha_atendimento':
         return <FichaAtendimentoForm />;
       case 'agenda':
-        return <div className="p-8 text-white"><h1>Agenda de Compromissos</h1><p className="text-slate-400 mt-2">Visualize e gerencie seus agendamentos.</p></div>;
-      case 'prontuario':
-        return <div className="p-8 text-white"><h1>Consultar Prontuário</h1><p className="text-slate-400 mt-2">Busca e visualização de prontuários médicos.</p></div>;
+        return <AgendaForm />;
       default:
         return (
           <div className="p-8 text-white">
